@@ -79,6 +79,7 @@ let updateIrradianceCubemap = computeIrradianceCubemapFromLightBuffer().compute(
 // SKYDOME
 const skydomeMesh = new Skydome(THETA, PHI, NEVG, 0x006eff, 0x262222);
 skydomeMesh.setScene(scene);
+let movingSun = true;
 
 // COMPUTE SHADER
 
@@ -91,6 +92,8 @@ function updateComputeSkydom() {
 
 // RENDER
 
+let up = true;
+let wait = 5;
 function render() {
 	const pixelRatio = renderer.getPixelRatio();
 	const width = window.innerWidth;
@@ -106,7 +109,41 @@ function render() {
 
 		meshLuminance.position.set(-camera.aspect * 0.005, -0.0005, -0.011);
 		meshIrradiance.position.set(-camera.aspect * 0.005, -0.004, -0.011);
-		plane.position.set(-camera.aspect * 0.005, 0.0035, -0.011);
+	}
+
+	if (movingSun && wait < 0) {
+		if (up) {
+			updateTheta(THETA + 0.02);
+		} else {
+			updateTheta(THETA - 0.02);
+		}
+
+		if (THETA > Math.PI / 2) {
+			up = false;
+		}
+		if (THETA < 0) {
+			up = true;
+		}
+
+		updatePhi((PHI + 0.02) % (Math.PI * 2));
+		skydomeMesh.setTheta(THETA);
+		skydomeMesh.setPhi(PHI);
+
+		updateComputeTexture.dispose();
+		updateComputeTexture = computeLuminanceTexture(NEVG, THETA, PHI).compute(
+			WIDTH * HEIGHT,
+		);
+
+		updateComputeCubemap.dispose();
+		updateComputeCubemap = computeLuminanceCubemap(NEVG, THETA, PHI).compute(
+			12 * WIDTH * HEIGHT,
+		);
+
+		updateComputeSkydom();
+
+		wait = 5;
+	} else if (movingSun) {
+		wait -= 1;
 	}
 
 	controls.update();
@@ -149,6 +186,7 @@ const PARAMS = {
 	THETA: 0.65,
 	PHI: 1.1,
 	NEVG: 0.75,
+	moving: true,
 };
 
 const pane = new Pane({
@@ -164,6 +202,14 @@ pane
 	.on("change", (ev) => {
 		if (!ev.last) return;
 		skydomeMesh.setSkyColor(ev.value);
+	});
+
+pane
+	.addBinding(PARAMS, "moving", {
+		label: "moving sun",
+	})
+	.on("change", (ev) => {
+		movingSun = ev.value;
 	});
 
 pane
