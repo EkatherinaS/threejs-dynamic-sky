@@ -1,0 +1,21 @@
+{
+	"name": "threejs-dynamic-sky",
+	"version": "1.0.0",
+    "type": "module",
+	"scripts": {
+		"build": "rollup --config",
+		"dev": "rollup --config --watch"
+	},
+    "dependencies": {
+        "three": "0.185.1",
+		"tweakpane": "^4.0.5"
+    },
+    "devDependencies": {
+        "rollup": "4.62.2",
+        "rollup-plugin-serve": "3.0.0",
+        "rollup-plugin-livereload" : "2.0.5",
+        "rollup-plugin-copy": "3.5.0",
+		"rollup-plugin-postcss": "^4.0.2",
+		"@rollup/plugin-node-resolve": "16.0.3"
+    }
+}
