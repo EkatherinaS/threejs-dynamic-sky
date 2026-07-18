@@ -4,6 +4,8 @@ import copy from "rollup-plugin-copy";
 import postcss from "rollup-plugin-postcss";
 import resolve from "@rollup/plugin-node-resolve";
 
+const dev = process.env.ROLLUP_WATCH === "true";
+
 export default {
 	input: "src/main.js",
 	output: {
@@ -22,12 +24,14 @@ export default {
 				{ src: "public/**/*", dest: "dist/public" },
 			],
 		}),
-		serve({
-			open: true,
-			contentBase: "dist",
-		}),
-		livereload({
-			watch: "dist",
-		}),
+		dev &&
+			serve({
+				open: true,
+				contentBase: "dist",
+			}),
+		dev &&
+			livereload({
+				watch: "dist",
+			}),
 	],
 };
